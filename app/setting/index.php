@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../includes/auth.php';
-require_admin(); // Hanya admin yang bisa akses
+require_admin();
 
 $pdo = db();
 
@@ -16,8 +16,8 @@ if (!$setting) {
 }
 
 $error = '';
-$success = '';
 
+// Handle POST
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nama_usaha = trim($_POST['nama_usaha'] ?? '');
     $alamat = trim($_POST['alamat'] ?? '');
@@ -27,17 +27,48 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $wa_hari = trim($_POST['wa_reminder_hari'] ?? '3,1,0');
     $wa_jam = $_POST['wa_jam_kirim'] ?? '08:00';
     $api_key_wa = trim($_POST['api_key_wa'] ?? '');
+    $deskripsi_psb = trim($_POST['deskripsi_psb'] ?? '');
+    $syarat_ketentuan = trim($_POST['syarat_ketentuan'] ?? '');
 
     if ($nama_usaha === '') {
         $error = 'Nama usaha wajib diisi.';
     } else {
-        $stmt = $pdo->prepare("UPDATE pengaturan SET nama_usaha = ?, alamat = ?, no_wa = ?, jatuh_tempo_tanggal = ?, denda = ?, wa_reminder_hari = ?, wa_jam_kirim = ?, api_key_wa = ?");
-        $stmt->execute([$nama_usaha, $alamat, $no_wa, $jatuh_tempo, $denda, $wa_hari, $wa_jam, $api_key_wa]);
+        try {
+            $stmt = $pdo->prepare("UPDATE pengaturan SET 
+                nama_usaha = ?, 
+                alamat = ?, 
+                no_wa = ?, 
+                jatuh_tempo_tanggal = ?, 
+                denda = ?, 
+                wa_reminder_hari = ?, 
+                wa_jam_kirim = ?, 
+                api_key_wa = ?, 
+                deskripsi_psb = ?, 
+                syarat_ketentuan = ?");
+            
+            $stmt->execute([
+                $nama_usaha, 
+                $alamat, 
+                $no_wa, 
+                $jatuh_tempo, 
+                $denda, 
+                $wa_hari, 
+                $wa_jam, 
+                $api_key_wa, 
+                $deskripsi_psb, 
+                $syarat_ketentuan
+            ]);
 
-        $_SESSION['flash'] = ['type' => 'success', 'message' => 'Pengaturan berhasil disimpan!'];
-        header('Location: index.php');
-        exit;
+            $_SESSION['flash'] = ['type' => 'success', 'message' => 'Pengaturan berhasil disimpan!'];
+            header('Location: index.php');
+            exit;
+        } catch (PDOException $e) {
+            $error = 'Gagal menyimpan: ' . $e->getMessage();
+        }
     }
+    
+    // Reload data setelah POST gagal
+    $setting = $pdo->query("SELECT * FROM pengaturan LIMIT 1")->fetch();
 }
 
 $page_title = 'Pengaturan';
@@ -93,13 +124,13 @@ $page_title = 'Pengaturan';
 
                             <div class="form-group">
                                 <label class="form-label">No WhatsApp Admin</label>
-                                <input type="text" name="no_wa" class="form-input" value="<?= htmlspecialchars($setting['no_wa']) ?>" placeholder="08xxxxxxxxxx">
+                                <input type="text" name="no_wa" class="form-input" value="<?= htmlspecialchars($setting['no_wa'] ?? '') ?>" placeholder="08xxxxxxxxxx">
                             </div>
                         </div>
 
                         <div class="form-group">
                             <label class="form-label">Alamat Usaha</label>
-                            <textarea name="alamat" class="form-input" rows="2"><?= htmlspecialchars($setting['alamat']) ?></textarea>
+                            <textarea name="alamat" class="form-input" rows="2"><?= htmlspecialchars($setting['alamat'] ?? '') ?></textarea>
                         </div>
                     </div>
 
@@ -115,13 +146,13 @@ $page_title = 'Pengaturan';
                         <div class="form-row">
                             <div class="form-group">
                                 <label class="form-label">Tanggal Jatuh Tempo (per bulan)</label>
-                                <input type="number" name="jatuh_tempo_tanggal" class="form-input" value="<?= $setting['jatuh_tempo_tanggal'] ?>" min="1" max="28">
+                                <input type="number" name="jatuh_tempo_tanggal" class="form-input" value="<?= $setting['jatuh_tempo_tanggal'] ?? 5 ?>" min="1" max="28">
                                 <small style="color: var(--text-secondary); font-size: 12px;">Tanggal 1-28 setiap bulannya</small>
                             </div>
 
                             <div class="form-group">
                                 <label class="form-label">Denda Keterlambatan (Rp)</label>
-                                <input type="number" name="denda" class="form-input" value="<?= $setting['denda'] ?>" min="0" step="1000">
+                                <input type="number" name="denda" class="form-input" value="<?= $setting['denda'] ?? 0 ?>" min="0" step="1000">
                                 <small style="color: var(--text-secondary); font-size: 12px;">Isi 0 jika tidak ada denda</small>
                             </div>
                         </div>
@@ -139,20 +170,42 @@ $page_title = 'Pengaturan';
                         <div class="form-row">
                             <div class="form-group">
                                 <label class="form-label">Reminder H-berapa saja (pisahkan koma)</label>
-                                <input type="text" name="wa_reminder_hari" class="form-input" value="<?= htmlspecialchars($setting['wa_reminder_hari']) ?>" placeholder="3,1,0">
+                                <input type="text" name="wa_reminder_hari" class="form-input" value="<?= htmlspecialchars($setting['wa_reminder_hari'] ?? '3,1,0') ?>" placeholder="3,1,0">
                                 <small style="color: var(--text-secondary); font-size: 12px;">Contoh: 3,1,0 artinya kirim reminder H-3, H-1, dan Hari-H</small>
                             </div>
 
                             <div class="form-group">
                                 <label class="form-label">Jam Kirim Reminder</label>
-                                <input type="time" name="wa_jam_kirim" class="form-input" value="<?= $setting['wa_jam_kirim'] ?>">
+                                <input type="time" name="wa_jam_kirim" class="form-input" value="<?= $setting['wa_jam_kirim'] ?? '08:00' ?>">
                             </div>
                         </div>
 
                         <div class="form-group">
                             <label class="form-label">API Key WhatsApp Gateway</label>
-                            <input type="password" name="api_key_wa" class="form-input" value="<?= htmlspecialchars($setting['api_key_wa']) ?>" placeholder="Masukkan API key dari provider WA gateway">
+                            <input type="password" name="api_key_wa" class="form-input" value="<?= htmlspecialchars($setting['api_key_wa'] ?? '') ?>" placeholder="Masukkan API key dari provider WA gateway">
                             <small style="color: var(--text-secondary); font-size: 12px;">Contoh: Fonnte, Wablas, atau provider lainnya</small>
+                        </div>
+                    </div>
+
+                    <!-- Pendaftaran PSB -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">
+                                <i class="bi bi-file-text"></i>
+                                Pendaftaran PSB
+                            </h2>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Deskripsi Form PSB</label>
+                            <textarea name="deskripsi_psb" class="form-input" rows="2" placeholder="Contoh: Daftar sekarang, gratis pemasangan!"><?= htmlspecialchars($setting['deskripsi_psb'] ?? '') ?></textarea>
+                            <small style="color: var(--text-secondary); font-size: 12px;">Teks ini muncul di bawah judul form pendaftaran</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Syarat & Ketentuan</label>
+                            <textarea name="syarat_ketentuan" class="form-input" rows="8" placeholder="Tulis syarat dan ketentuan di sini..."><?= htmlspecialchars($setting['syarat_ketentuan'] ?? '') ?></textarea>
+                            <small style="color: var(--text-secondary); font-size: 12px;">Teks ini akan muncul di form pendaftaran dan harus disetujui calon pelanggan</small>
                         </div>
                     </div>
 

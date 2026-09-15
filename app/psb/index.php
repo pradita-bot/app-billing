@@ -46,57 +46,62 @@ $page_title = 'PSB (Pemasangan Baru)';
                     <div class="table-wrapper">
                         <table>
                             <thead>
-                                <tr>
-                                    <th>No</th>
-                                    <th>Nama</th>
-                                    <th>No HP</th>
-                                    <th>Desa</th>
-                                    <th>Status</th>
-                                    <th>Tanggal Daftar</th>
-                                    <th>Aksi</th>
-                                </tr>
+                            <tr>
+                                <th>No</th>
+                                <th>Foto</th>
+                                <th>Nama</th>
+                                <th>No HP</th>
+                                <th>Paket</th>
+                                <th>Desa</th>
+                                <th>Status</th>
+                                <th>Aksi</th>
+                            </tr>
                             </thead>
                             <tbody>
-                                <?php if (empty($psb)): ?>
+                                <?php foreach ($psb as $i => $p): ?>
                                     <tr>
-                                        <td colspan="7" style="text-align: center; color: var(--text-secondary); padding: 40px;">
-                                            <i class="bi bi-inbox" style="font-size: 48px; display: block; margin-bottom: 12px;"></i>
-                                            Belum ada permintaan PSB.
+                                        <td><?= $i + 1 ?></td>
+                                        <td>
+                                            <?php if ($p['foto_rumah']): ?>
+                                                <a href="/uploads/foto_psb/<?= $p['foto_rumah'] ?>" target="_blank">
+                                                    <img src="/uploads/foto_psb/<?= $p['foto_rumah'] ?>" 
+                                                        style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px; cursor: pointer;"
+                                                        alt="Foto Rumah">
+                                                </a>
+                                            <?php else: ?>
+                                                <span style="color: var(--text-secondary);">-</span>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td><strong><?= htmlspecialchars($p['nama']) ?></strong></td>
+                                        <td><?= htmlspecialchars($p['no_hp']) ?></td>
+                                        <td><?= htmlspecialchars($p['nama_paket'] ?? '-') ?></td>
+                                        <td><?= htmlspecialchars($p['desa'] ?? '-') ?></td>
+                                        <td>
+                                            <?php
+                                            $status_map = [
+                                                'baru' => ['label' => 'Baru', 'class' => 'badge-primary'],
+                                                'survey' => ['label' => 'Survey', 'class' => 'badge-warning'],
+                                                'menunggu_bayar' => ['label' => 'Menunggu Bayar', 'class' => 'badge-warning'],
+                                                'dikerjakan' => ['label' => 'Dikerjakan', 'class' => 'badge-primary'],
+                                                'selesai' => ['label' => 'Selesai', 'class' => 'badge-success'],
+                                                'ditolak' => ['label' => 'Ditolak', 'class' => 'badge-danger'],
+                                            ];
+                                            $st = $status_map[$p['status']] ?? ['label' => ucfirst($p['status']), 'class' => ''];
+                                            ?>
+                                            <span class="badge <?= $st['class'] ?>"><?= $st['label'] ?></span>
+                                        </td>
+                                        <td>
+                                            <?php if ($p['latitude'] && $p['longitude']): ?>
+                                                <a href="https://maps.google.com/?q=<?= $p['latitude'] ?>,<?= $p['longitude'] ?>" target="_blank" class="btn btn-secondary btn-sm" title="Lihat di Google Maps">
+                                                    <i class="bi bi-geo-alt"></i>
+                                                </a>
+                                            <?php endif; ?>
+                                            <a href="edit.php?id=<?= $p['id'] ?>" class="btn btn-warning btn-sm" title="Edit">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
                                         </td>
                                     </tr>
-                                <?php else: ?>
-                                    <?php foreach ($psb as $i => $p): ?>
-                                        <tr>
-                                            <td><?= $i + 1 ?></td>
-                                            <td><strong><?= htmlspecialchars($p['nama']) ?></strong></td>
-                                            <td><?= htmlspecialchars($p['no_hp']) ?></td>
-                                            <td><?= htmlspecialchars($p['desa'] ?? '-') ?></td>
-                                            <td>
-                                                <?php
-                                                $status_map = [
-                                                    'baru' => ['label' => 'Baru', 'class' => 'badge-primary'],
-                                                    'survey' => ['label' => 'Survey', 'class' => 'badge-warning'],
-                                                    'menunggu_bayar' => ['label' => 'Menunggu Bayar', 'class' => 'badge-warning'],
-                                                    'dikerjakan' => ['label' => 'Dikerjakan', 'class' => 'badge-primary'],
-                                                    'selesai' => ['label' => 'Selesai', 'class' => 'badge-success'],
-                                                    'ditolak' => ['label' => 'Ditolak', 'class' => 'badge-danger'],
-                                                ];
-                                                $st = $status_map[$p['status']] ?? ['label' => ucfirst($p['status']), 'class' => ''];
-                                                ?>
-                                                <span class="badge <?= $st['class'] ?>"><?= $st['label'] ?></span>
-                                            </td>
-                                            <td><?= date('d M Y', strtotime($p['created_at'])) ?></td>
-                                            <td>
-                                                <a href="edit.php?id=<?= $p['id'] ?>" class="btn btn-warning btn-sm" title="Edit">
-                                                    <i class="bi bi-pencil"></i>
-                                                </a>
-                                                <a href="hapus.php?id=<?= $p['id'] ?>" class="btn btn-danger btn-sm" title="Hapus" onclick="return confirm('Yakin mau hapus data PSB ini?')">
-                                                    <i class="bi bi-trash"></i>
-                                                </a>
-                                            </td>
-                                        </tr>
-                                    <?php endforeach; ?>
-                                <?php endif; ?>
+                                <?php endforeach; ?>
                             </tbody>
                         </table>
                     </div>
