@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../includes/auth.php';
 require_login();
+require_csrf();
 
 $pdo = db();
 $paket_list = $pdo->query("SELECT id, nama_paket, harga_bulanan FROM paket WHERE status = 1 ORDER BY harga_bulanan ASC")->fetchAll();
@@ -20,6 +21,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $paket_id = intval($_POST['paket_id'] ?? 0);
     $status = $_POST['status'] ?? 'aktif';
     $tgl_pasang = $_POST['tgl_pasang'] ?? date('Y-m-d');
+
+    // Validasi MAC address
+    if ($mac_address !== '' && !validate_mac($mac_address)) {
+        $error = 'Format MAC address tidak valid. Gunakan format: AA:BB:CC:DD:EE:FF';
+    }
+
+    // Validasi nomor HP
+    if (!validate_phone($no_hp)) {
+        $error = 'Format nomor HP tidak valid.';
+    }
+
+    // Format nomor HP ke internasional
+    $no_hp = format_phone($no_hp);
 
     if ($nama === '' || $no_hp === '') {
         $error = 'Nama dan No HP wajib diisi.';

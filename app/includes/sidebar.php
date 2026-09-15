@@ -11,19 +11,19 @@ $current_dir = basename(dirname($_SERVER['PHP_SELF']));
     </div>
 
     <nav>
-        <a href="/dashboard.php" class="menu-item <?= $current_page == 'dashboard.php' ? 'active' : '' ?>">
+        <a href="../dashboard.php" class="menu-item <?= $current_page == 'dashboard.php' ? 'active' : '' ?>">
             <i class="bi bi-house-door menu-icon"></i>
             Dashboard
         </a>
 
         <div class="menu-divider"></div>
 
-        <a href="/pelanggan/index.php" class="menu-item <?= $current_dir == 'pelanggan' ? 'active' : '' ?>">
+        <a href="../pelanggan/index.php" class="menu-item <?= $current_dir == 'pelanggan' ? 'active' : '' ?>">
             <i class="bi bi-people menu-icon"></i>
             Pelanggan
         </a>
 
-        <a href="/paket/index.php" class="menu-item <?= $current_dir == 'paket' ? 'active' : '' ?>">
+        <a href="../paket/index.php" class="menu-item <?= $current_dir == 'paket' ? 'active' : '' ?>">
             <i class="bi bi-box-seam menu-icon"></i>
             Paket
         </a>
@@ -40,7 +40,7 @@ $current_dir = basename(dirname($_SERVER['PHP_SELF']));
 
         <div class="menu-divider"></div>
 
-        <a href="/psb/index.php" class="menu-item <?= $current_dir == 'psb' ? 'active' : '' ?>">
+        <a href="../psb/index.php" class="menu-item <?= $current_dir == 'psb' ? 'active' : '' ?>">
             <i class="bi bi-tools menu-icon"></i>
             PSB
         </a>
@@ -57,14 +57,14 @@ $current_dir = basename(dirname($_SERVER['PHP_SELF']));
 
         <div class="menu-divider"></div>
 
-        <?php if ($_SESSION['role'] == 'admin'): ?>
-            <a href="/setting/index.php" class="menu-item <?= $current_dir == 'setting' ? 'active' : '' ?>">
+        <?php if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin'): ?>
+            <a href="../setting/index.php" class="menu-item <?= $current_dir == 'setting' ? 'active' : '' ?>">
                 <i class="bi bi-gear menu-icon"></i>
                 Setting
             </a>
         <?php endif; ?>
 
-        <a href="/logout.php" class="menu-item" style="color: rgba(255,255,255,0.5);">
+        <a href="../logout.php" class="menu-item" style="color: rgba(255,255,255,0.5);">
             <i class="bi bi-box-arrow-right menu-icon"></i>
             Logout
         </a>

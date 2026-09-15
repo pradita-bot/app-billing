@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../includes/auth.php';
 require_login();
+require_csrf();
 
 $id = intval($_GET['id'] ?? 0);
 $stmt = db()->prepare('SELECT * FROM paket WHERE id = ?');
@@ -32,6 +33,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 }
+
+$page_title = 'Edit Paket';
 ?>
 <!DOCTYPE html>
 <html lang="id" data-theme="light">
@@ -63,20 +66,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <?php if ($error): ?>
                         <div class="alert alert-danger">
                             <i class="bi bi-exclamation-circle"></i>
-                            <?= htmlspecialchars($error) ?>
+                            <?= e($error) ?>
                         </div>
                     <?php endif; ?>
 
                     <form method="post">
+                        <?= csrf_field() ?>
+                        
                         <div class="form-row">
                             <div class="form-group">
                                 <label class="form-label">Nama Paket</label>
-                                <input type="text" name="nama_paket" class="form-input" value="<?= htmlspecialchars($paket['nama_paket']) ?>" required>
+                                <input type="text" name="nama_paket" class="form-input" value="<?= e($paket['nama_paket']) ?>" required>
                             </div>
 
                             <div class="form-group">
                                 <label class="form-label">Kecepatan</label>
-                                <input type="text" name="kecepatan" class="form-input" value="<?= htmlspecialchars($paket['kecepatan']) ?>" required>
+                                <input type="text" name="kecepatan" class="form-input" value="<?= e($paket['kecepatan']) ?>" required>
                             </div>
                         </div>
 
@@ -105,20 +110,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </div>
 
-    <script>
-        const savedTheme = localStorage.getItem('theme') || 'light';
-        document.documentElement.setAttribute('data-theme', savedTheme);
-
-        function toggleTheme() {
-            const current = document.documentElement.getAttribute('data-theme');
-            const newTheme = current === 'light' ? 'dark' : 'light';
-            document.documentElement.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-        }
-
-        function toggleSidebar() {
-            document.querySelector('.sidebar').classList.toggle('open');
-        }
-    </script>
+    <?php include __DIR__ . '/../includes/footer.php'; ?>
 </body>
 </html>

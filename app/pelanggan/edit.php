@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../includes/auth.php';
 require_login();
+require_csrf();
 
 $pdo = db();
 $id = intval($_GET['id'] ?? 0);
@@ -43,6 +44,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
+// Validasi MAC address
+if ($mac_address !== '' && !validate_mac($mac_address)) {
+    $error = 'Format MAC address tidak valid. Gunakan format: AA:BB:CC:DD:EE:FF';
+}
+
+// Validasi nomor HP
+if (!validate_phone($no_hp)) {
+    $error = 'Format nomor HP tidak valid.';
+}
+
+// Format nomor HP ke internasional
+$no_hp = format_phone($no_hp);
 $page_title = 'Edit Pelanggan';
 ?>
 <!DOCTYPE html>

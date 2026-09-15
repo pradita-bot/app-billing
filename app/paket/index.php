@@ -65,8 +65,8 @@ $page_title = 'Paket Internet';
                                     <?php foreach ($paket as $i => $p): ?>
                                         <tr>
                                             <td><?= $i + 1 ?></td>
-                                            <td><strong><?= htmlspecialchars($p['nama_paket']) ?></strong></td>
-                                            <td><?= htmlspecialchars($p['kecepatan']) ?></td>
+                                            <td><strong><?= e($p['nama_paket']) ?></strong></td>
+                                            <td><?= e($p['kecepatan']) ?></td>
                                             <td>Rp <?= number_format($p['harga_bulanan'], 0, ',', '.') ?></td>
                                             <td>
                                                 <?php if ($p['status'] == 1): ?>
@@ -79,7 +79,10 @@ $page_title = 'Paket Internet';
                                                 <a href="edit.php?id=<?= $p['id'] ?>" class="btn btn-warning btn-sm" title="Edit">
                                                     <i class="bi bi-pencil"></i>
                                                 </a>
-                                                <a href="hapus.php?id=<?= $p['id'] ?>" class="btn btn-danger btn-sm" title="Hapus" onclick="return confirm('Yakin mau hapus paket ini?')">
+                                                <a href="hapus.php?id=<?= $p['id'] ?>&csrf_token=<?= csrf_token() ?>" 
+                                                   class="btn btn-danger btn-sm" 
+                                                   title="Hapus" 
+                                                   onclick="return confirm('Yakin mau hapus paket ini?')">
                                                     <i class="bi bi-trash"></i>
                                                 </a>
                                             </td>

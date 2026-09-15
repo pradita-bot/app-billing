@@ -32,27 +32,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'Anda harus menyetujui syarat dan ketentuan.';
     } else {
         // Handle upload foto
-        $foto_rumah = null;
-        if (isset($_FILES['foto_rumah']) && $_FILES['foto_rumah']['error'] === UPLOAD_ERR_OK) {
-            $upload_dir = __DIR__ . '/../uploads/foto_psb/';
+        // Handle upload foto dengan keamanan lebih ketat
+$foto_rumah = null;
+if (isset($_FILES['foto_rumah']) && $_FILES['foto_rumah']['error'] === UPLOAD_ERR_OK) {
+    $upload_dir = __DIR__ . '/../uploads/foto_psb/';
+    
+    // Buat folder jika belum ada
+    if (!is_dir($upload_dir)) {
+        mkdir($upload_dir, 0755, true);
+    }
+
+    // Verifikasi file adalah gambar asli
+    $check = getimagesize($_FILES['foto_rumah']['tmp_name']);
+    if ($check === false) {
+        $error = 'File yang diupload bukan gambar yang valid.';
+    } else {
+        $file_ext = strtolower(pathinfo($_FILES['foto_rumah']['name'], PATHINFO_EXTENSION));
+        $allowed_ext = ['jpg', 'jpeg', 'png', 'webp'];
+        $allowed_mime = ['image/jpeg', 'image/png', 'image/webp'];
+
+        if (!in_array($file_ext, $allowed_ext)) {
+            $error = 'Format foto harus JPG, PNG, atau WEBP.';
+        } elseif (!in_array($check['mime'], $allowed_mime)) {
+            $error = 'MIME type file tidak valid.';
+        } elseif ($_FILES['foto_rumah']['size'] > 5 * 1024 * 1024) {
+            $error = 'Ukuran foto maksimal 5 MB.';
+        } else {
+            // Generate nama file yang aman
+            $foto_rumah = 'psb_' . date('Ymd_His') . '_' . uniqid() . '.' . $file_ext;
             
-            // Buat folder jika belum ada
-            if (!is_dir($upload_dir)) {
-                mkdir($upload_dir, 0755, true);
-            }
-
-            $file_ext = strtolower(pathinfo($_FILES['foto_rumah']['name'], PATHINFO_EXTENSION));
-            $allowed_ext = ['jpg', 'jpeg', 'png', 'webp'];
-
-            if (!in_array($file_ext, $allowed_ext)) {
-                $error = 'Format foto harus JPG, PNG, atau WEBP.';
-            } elseif ($_FILES['foto_rumah']['size'] > 5 * 1024 * 1024) {
-                $error = 'Ukuran foto maksimal 5 MB.';
-            } else {
-                $foto_rumah = 'psb_' . date('Ymd_His') . '_' . uniqid() . '.' . $file_ext;
-                move_uploaded_file($_FILES['foto_rumah']['tmp_name'], $upload_dir . $foto_rumah);
+            if (!move_uploaded_file($_FILES['foto_rumah']['tmp_name'], $upload_dir . $foto_rumah)) {
+                $error = 'Gagal menyimpan file.';
+                $foto_rumah = null;
             }
         }
+    }
+}
 
         if ($error === '') {
             $stmt = $pdo->prepare('INSERT INTO psb (nama, no_hp, alamat, desa, kecamatan, catatan, paket_id, latitude, longitude, foto_rumah, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');

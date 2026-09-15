@@ -1,5 +1,5 @@
 -- =====================================================
--- SKEMA DATABASE BILLING RT/RW NET
+-- SKEMA DATABASE BILLING RT/RW NET (UPDATED)
 -- =====================================================
 
 -- 1. USER APLIKASI (Admin & Teknisi)
@@ -47,7 +47,7 @@ CREATE TABLE pelanggan (
   INDEX idx_desa (desa)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 4. PSB (Pemasangan Baru)
+-- 4. PSB (Pemasangan Baru) - UPDATED
 CREATE TABLE psb (
   id INT AUTO_INCREMENT PRIMARY KEY,
   nama VARCHAR(100) NOT NULL,
@@ -58,11 +58,14 @@ CREATE TABLE psb (
   latitude DECIMAL(10,7),
   longitude DECIMAL(10,7),
   catatan TEXT,
+  paket_id INT NULL,
+  foto_rumah VARCHAR(255) NULL,
   status ENUM('baru','survey','menunggu_bayar','dikerjakan','selesai','ditolak') NOT NULL DEFAULT 'baru',
   teknisi_id INT,
   jadwal_survey DATETIME,
   hasil_survey TEXT,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (paket_id) REFERENCES paket(id) ON DELETE SET NULL,
   FOREIGN KEY (teknisi_id) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -147,7 +150,7 @@ CREATE TABLE log_aktivitas (
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 11. PENGATURAN APLIKASI
+-- 11. PENGATURAN APLIKASI - UPDATED
 CREATE TABLE pengaturan (
   nama_usaha VARCHAR(150) NOT NULL DEFAULT 'RT/RW Net',
   alamat TEXT,
@@ -156,11 +159,14 @@ CREATE TABLE pengaturan (
   denda DECIMAL(12,2) NOT NULL DEFAULT 0,
   wa_reminder_hari VARCHAR(20) NOT NULL DEFAULT '3,1,0',
   wa_jam_kirim TIME NOT NULL DEFAULT '08:00',
-  api_key_wa VARCHAR(255)
+  api_key_wa VARCHAR(255),
+  deskripsi_psb TEXT NULL,
+  syarat_ketentuan TEXT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Data awal
-INSERT INTO pengaturan (nama_usaha) VALUES ('RT/RW Net Wak');
+INSERT INTO pengaturan (nama_usaha, deskripsi_psb, syarat_ketentuan) VALUES 
+('RT/RW Net', 'Isi form di bawah untuk mendaftar layanan internet RT/RW Net', 'Dengan mendaftar, Anda setuju untuk mematuhi semua aturan yang berlaku.');
 
 INSERT INTO paket (nama_paket, kecepatan, harga_bulanan) VALUES
 ('Paket Hemat', '10 Mbps', 75000),
