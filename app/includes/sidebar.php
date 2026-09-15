@@ -1,5 +1,4 @@
 <?php
-// Ambil nama file saat ini untuk highlight menu aktif
 $current_page = basename($_SERVER['PHP_SELF']);
 $current_dir = basename(dirname($_SERVER['PHP_SELF']));
 ?>
@@ -58,10 +57,12 @@ $current_dir = basename(dirname($_SERVER['PHP_SELF']));
 
         <div class="menu-divider"></div>
 
-        <a href="#" class="menu-item">
-            <i class="bi bi-gear menu-icon"></i>
-            Setting
-        </a>
+        <?php if ($_SESSION['role'] == 'admin'): ?>
+            <a href="/setting/index.php" class="menu-item <?= $current_dir == 'setting' ? 'active' : '' ?>">
+                <i class="bi bi-gear menu-icon"></i>
+                Setting
+            </a>
+        <?php endif; ?>
 
         <a href="/logout.php" class="menu-item" style="color: rgba(255,255,255,0.5);">
             <i class="bi bi-box-arrow-right menu-icon"></i>
