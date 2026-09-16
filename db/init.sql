@@ -172,3 +172,24 @@ INSERT INTO paket (nama_paket, kecepatan, harga_bulanan) VALUES
 ('Paket Hemat', '10 Mbps', 75000),
 ('Paket Keluarga', '20 Mbps', 100000),
 ('Paket Sultan', '30 Mbps', 150000);
+-- 4. PSB (Pemasangan Baru) - UPDATED dengan status konversi
+CREATE TABLE psb (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  nama VARCHAR(100) NOT NULL,
+  no_hp VARCHAR(20) NOT NULL,
+  alamat TEXT,
+  desa VARCHAR(100),
+  kecamatan VARCHAR(100),
+  latitude DECIMAL(10,7),
+  longitude DECIMAL(10,7),
+  catatan TEXT,
+  paket_id INT NULL,
+  foto_rumah VARCHAR(255) NULL,
+  status ENUM('baru','survey','menunggu_bayar','dikerjakan','selesai','ditolak','sudah_konversi') NOT NULL DEFAULT 'baru',
+  teknisi_id INT,
+  jadwal_survey DATETIME,
+  hasil_survey TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (paket_id) REFERENCES paket(id) ON DELETE SET NULL,
+  FOREIGN KEY (teknisi_id) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
